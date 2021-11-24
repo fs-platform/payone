@@ -5,6 +5,7 @@ namespace Smbear\Payone;
 use Illuminate\Support\Facades\Log;
 use Smbear\Payone\Traits\PayoneConfig;
 use Smbear\Payone\Services\PayoneRequest;
+use Smbear\Payone\Exceptions\MethodException;
 use Smbear\Payone\Exceptions\ParametersException;
 
 class Payone
@@ -25,6 +26,11 @@ class Payone
      * @var array 配置文件
      */
     public array $config = [];
+
+    /**
+     * @var string 返回值的 signature
+     */
+    public string $signature;
 
     /**
      * @var string 支付方式
@@ -62,13 +68,30 @@ class Payone
      * @return $this
      * @throws ParametersException
      */
-    public function setPayoneMethod(string $payoneMethod)
+    public function setPayoneMethod(string $payoneMethod) : self
     {
         if (empty($payoneMethod)) {
             throw new ParametersException(__FUNCTION__.'：方法 参数异常');
         }
 
         $this->payoneMethod = $payoneMethod;
+
+        return $this;
+    }
+
+    /**
+     * 设置success的signature
+     * @param string $signature
+     * @return $this
+     * @throws ParametersException
+     */
+    public function setSignature(string $signature) : self
+    {
+        if (empty($signature)) {
+            throw new ParametersException(__FUNCTION__.'：方法 参数异常');
+        }
+
+        $this->signature = $signature;
 
         return $this;
     }
@@ -137,6 +160,16 @@ class Payone
             'narrative_text'
         ],$parameters,__FUNCTION__);
 
+        //判断setPayoneMethod方法是否被使用
+        if (empty($this->payoneMethod)) {
+            throw new MethodException('setPayoneMethod 方法调用异常');
+        }
+
+        //判断setSignature方法是否被使用
+        if (empty($this->signature)) {
+            throw new MethodException('setSignature 方法调用异常');
+        }
+
         if (empty($this->invoice)) {
             $this->invoice = [
                 'bankcountry'            => $parameters['bankcountry'],
@@ -144,7 +177,7 @@ class Payone
                 'currency'               => $parameters['currency'],
                 'reference'              => $parameters['reference'],
                 'narrative_text'         => $parameters['narrative_text'],
-                'successurl'             => $this->config['successurl'],
+                'successurl'             => $this->config['successurl'].'&reference='.$parameters['reference'] . '&signature=' .$this->signature,
                 'errorurl'               => $this->config['errorurl'],
                 'backurl'                => $this->config['backurl'],
                 'request'                => $this->config['request'],
@@ -190,12 +223,12 @@ class Payone
         try {
             Log::channel(config('payone.channel'))
                 ->info('初始化请求:'.json_encode($request));
-            
+
             $result = $this->payoneRequest
                 ->sendRequest($this->config['url'],$request);
 
             Log::channel(config('payone.channel'))
-                ->info('初始化响应:'.json_encode($request));
+                ->info('初始化响应:'.json_encode($result));
 
             if ($result['Status'] == 'REDIRECT') {
                 return payone_return_success('success',[
@@ -206,7 +239,7 @@ class Payone
             }
         }catch (\Exception|\Error|\Throwable $exception) {
             report($exception);
-            
+
             Log::channel(config('payone.channel'))
                 ->info('初始化异常:'.$exception->__toString());
 
