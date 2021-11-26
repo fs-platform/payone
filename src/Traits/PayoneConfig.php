@@ -27,17 +27,18 @@ trait PayoneConfig
      */
     public function setEnvironment(string $environment = '')
     {
-        $this->environment = $environment ?: config('paypal.environment');
+        $this->environment = $environment ?: config('payone.environment');
     }
 
     /**
      * @Notes:获取到指定模型的配置数据
      *
      * @param array $dependencies
+     * @return array
+     * @throws ConfigException
      * @Author: smile
      * @Date: 2021/6/30
      * @Time: 17:58
-     * @throws ConfigException
      */
     public function getConfig(array $dependencies) : array
     {

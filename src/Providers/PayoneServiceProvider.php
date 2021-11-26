@@ -3,6 +3,7 @@
 namespace Smbear\Payone\Providers;
 
 use Smbear\Payone\Payone;
+use Smbear\Payone\Enums\PayoneEnums;
 use Illuminate\Support\ServiceProvider;
 
 class PayoneServiceProvider extends ServiceProvider
@@ -26,12 +27,12 @@ class PayoneServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->singleton('payone',function (){
+        $this->app->singleton(PayoneEnums::CONFIG,function (){
             return new Payone();
         });
 
         $this->mergeConfigFrom(
-            __DIR__.'/../../config/payone.php', 'payone'
+            __DIR__.'/../../config/payone.php', PayoneEnums::CONFIG
         );
     }
 }

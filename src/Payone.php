@@ -42,8 +42,14 @@ class Payone
      */
     public object $payoneRequest;
 
+    /**
+     * @throws Exceptions\ConfigException
+     */
     public function __construct()
     {
+        //设置初始化环境
+        $this->setEnvironment();
+
         //初始化配置信息
         if (empty($this->config)) {
             $this->config = $this->getConfig([
@@ -104,6 +110,7 @@ class Payone
      * @Author: smile
      * @Date: 2021/10/8
      * @Time: 14:57
+     * @throws ParametersException
      */
     public function setPerson(array $parameters) : self
     {
@@ -141,9 +148,9 @@ class Payone
      * 设置账期信息
      * @param array $parameters
      * @return $this
-     * @throws ParametersException
+     * @throws ParametersException|MethodException
      */
-    public function setInvoice(array $parameters)
+    public function setInvoice(array $parameters) : self
     {
         if (empty($parameters)) {
             if (empty($payoneMethod)) {
@@ -191,8 +198,9 @@ class Payone
 
     /**
      * 验证参数是否异常
-     * @param array $parameters
      * @param array $require
+     * @param array $parameters
+     * @param string $functionName
      * @throws ParametersException
      */
     protected function checkParameters(array $require,array $parameters,string $functionName = __FUNCTION__)
@@ -208,7 +216,7 @@ class Payone
      * 初始化页面
      * 获取到url页面地址
      */
-    public function initCheckout()
+    public function initCheckout(): array
     {
         $request = array_merge([
             'aid'         => $this->config['aid'],

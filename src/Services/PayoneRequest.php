@@ -3,6 +3,7 @@
 namespace Smbear\Payone\Services;
 
 use Illuminate\Support\Facades\Http;
+use Illuminate\Http\Client\RequestException;
 use Smbear\Payone\Exceptions\ParametersException;
 
 class PayoneRequest
@@ -12,7 +13,7 @@ class PayoneRequest
      * @param string $url
      * @param array $request
      * @return array|mixed
-     * @throws \Illuminate\Http\Client\RequestException
+     * @throws RequestException|ParametersException
      */
     public function sendRequest(string $url,array $request)
     {
