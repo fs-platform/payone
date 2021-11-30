@@ -19,8 +19,14 @@ return [
         'backurl'      => env('PAYONE_SANDBOX_BACKURL',''),
         'request'      => env('PAYONE_SANDBOX_REQUEST','authorization') ,
         'clearingtype' => env('PAYONE_SANDBOX_CLEARINGTYPE','sb'),
-        'sofort'         => [
-            'onlinebanktransfertype' => 'PNT'
+        'sofort' => [
+            'onlinebanktransfertype' => 'PNT',
+        ],
+        'ideal' => [
+            'onlinebanktransfertype' => 'IDL',
+        ],
+        'giropay' => [
+            'onlinebanktransfertype' => 'GPY'
         ]
     ],
 
@@ -38,8 +44,14 @@ return [
         'backurl'      => env('PAYONE_PRODUCTION_BACKURL',''),
         'request'      => env('PAYONE_PRODUCTION_REQUEST','authorization') ,
         'clearingtype' => env('PAYONE_PRODUCTION_CLEARINGTYPE','sb'),
-        'sofort'         => [
-            'onlinebanktransfertype' => 'PNT'
+        'sofort' => [
+            'onlinebanktransfertype' => 'PNT',
+        ],
+        'ideal' => [
+            'onlinebanktransfertype' => 'IDL',
+        ],
+        'giropay' => [
+            'onlinebanktransfertype' => 'GPY'
         ]
     ]
 ];

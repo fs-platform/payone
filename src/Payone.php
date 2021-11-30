@@ -153,14 +153,11 @@ class Payone
     public function setInvoice(array $parameters) : self
     {
         if (empty($parameters)) {
-            if (empty($payoneMethod)) {
-                throw new ParametersException(__FUNCTION__.'：方法 参数异常');
-            }
+            throw new ParametersException(__FUNCTION__.'：方法 参数异常');
         }
 
         //验证数据是否异常
         $this->checkParameters([
-            'bankcountry',
             'amount',
             'currency',
             'reference',
@@ -189,8 +186,15 @@ class Payone
                 'backurl'                => $this->config['backurl'],
                 'request'                => $this->config['request'],
                 'clearingtype'           => $this->config['clearingtype'],
-                'onlinebanktransfertype' => $this->config[$this->payoneMethod]['onlinebanktransfertype']
+                'onlinebanktransfertype' => $this->config[$this->payoneMethod]['onlinebanktransfertype'],
+                'iban'                   => $parameters['iban'],
             ];
+
+            if ($this->payoneMethod == 'ideal') {
+                $this->invoice = array_merge($this->invoice,[
+                    'bankgrouptype' => $parameters['bankgrouptype'],
+                ]);
+            }
         }
 
         return $this;
@@ -213,11 +217,52 @@ class Payone
     }
 
     /**
+     * 核验方法是否已经全部调用
+     * @param array $methods
+     * @throws ParametersException
+     */
+    protected function checkMethods(...$methods)
+    {
+        array_walk($methods,function ($item){
+            $attribute = $item['attribute'] ?? '';
+
+            if (empty($attribute)) {
+                return ;
+            }
+
+            if (!isset($this->$attribute)  || empty($this->$attribute)) {
+                throw new ParametersException($item['method'].' 异常，请先调用');
+            }
+        });
+    }
+
+    /**
      * 初始化页面
      * 获取到url页面地址
+     * @throws ParametersException
      */
     public function initCheckout(): array
     {
+        //判断方法是否全部正常调用
+        $this->checkMethods(
+            [
+                'method' => 'setPayoneMethod',
+                'attribute' => 'payoneMethod'
+            ],
+            [
+                'method' => 'setSignature',
+                'attribute' => 'signature'
+            ],
+            [
+                'method' => 'setPerson',
+                'attribute' => 'person'
+            ],
+            [
+                'method' => 'setInvoice',
+                'attribute' => 'invoice'
+            ]
+        );
+
         $request = array_merge([
             'aid'         => $this->config['aid'],
             'mid'         => $this->config['mid'],
