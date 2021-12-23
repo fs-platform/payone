@@ -18,6 +18,11 @@ class Payone
     public array $person = [];
 
     /**
+     * @var array 运输信息
+     */
+    public array $delivery = [];
+
+    /**
      * @var array 交易信息
      */
     public array $invoice = [];
@@ -145,6 +150,34 @@ class Payone
     }
 
     /**
+     * 设置运输信息
+     * @param array $parameters
+     * @return Payone
+     * @throws ParametersException
+     */
+    public function setDelivery(array $parameters): self
+    {
+        if (empty($parameters)) {
+            if (empty($payoneMethod)) {
+                throw new ParametersException(__FUNCTION__.'：方法 参数异常');
+            }
+        }
+
+        if (empty($this->delivery)) {
+            $this->delivery = [
+                'shipping_firstname' => $parameters['shipping_firstname'],
+                'shipping_lastname'  => $parameters['shipping_lastname'],
+                'shipping_street'    => $parameters['shipping_street'],
+                'shipping_zip'       => $parameters['shipping_zip'],
+                'shipping_city'      => $parameters['shipping_city'],
+                'shipping_country'   => $parameters['shipping_country'],
+            ];
+        }
+
+        return $this;
+    }
+
+    /**
      * 设置账期信息
      * @param array $parameters
      * @return $this
@@ -260,6 +293,10 @@ class Payone
             [
                 'method' => 'setInvoice',
                 'attribute' => 'invoice'
+            ],
+            [
+                'method' => 'setDelivery',
+                'attribute' => 'delivery'
             ]
         );
 
@@ -271,7 +308,7 @@ class Payone
             'mode'        => $this->config['mode'],
             'api_version' => $this->config['api_version'],
             'encoding'    => $this->config['encoding']
-        ],$this->invoice,$this->person);
+        ],$this->invoice,$this->person,$this->delivery);
 
         try {
             Log::channel(config('payone.channel'))
