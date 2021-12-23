@@ -223,6 +223,10 @@ class Payone
                 'iban'                   => $parameters['iban'],
             ];
 
+            //记录返回的url地址
+            Log::channel(config('payone.channel'))
+                ->info('返回的url地址为:'.$this->config['successurl'].'&reference='.$parameters['reference'] . '&signature=' .$this->signature);
+
             if ($this->payoneMethod == 'ideal') {
                 $this->invoice = array_merge($this->invoice,[
                     'bankgrouptype' => $parameters['bankgrouptype'],
